@@ -136,3 +136,77 @@ void loop() {
     }
   }
   
+  // 4. Teclado 3x4
+  char tecla = teclado.getKey();
+
+  if (tecla) {
+    if (tecla == '#') {
+      arLigado = !arLigado;
+      if (!arLigado) {
+        desligadoManual = true;
+        voltandoAoAmbiente = true;
+      } else {
+        desligadoManual = false;
+        voltandoAoAmbiente = false;
+      }
+      atualizarLinha0 = true;
+    }
+    else if (tecla == '*') {
+      tamSenha = 0;
+      senhaDigitada[0] = '\0';
+      atualizarLinha1 = true;
+    }
+    else if (tecla >= '0' && tecla <= '9') {
+      if (tamSenha < 4) {
+        senhaDigitada[tamSenha] = tecla;
+        tamSenha++;
+        senhaDigitada[tamSenha] = '\0';
+        atualizarLinha1 = true;
+      }
+
+      if (tamSenha == 4) {
+        if (senhaDigitada[0] == '1' && senhaDigitada[1] == '2' && senhaDigitada[2] == '3' && senhaDigitada[3] == '4') {
+          alarmeDisparado = false;
+          noTone(Buzzer);
+          estadoSom = false;
+        }
+        tamSenha = 0;
+        senhaDigitada[0] = '\0';
+        atualizarLinha1 = true;
+      }
+    }
+  }
+
+  // 5. Atualiza só a linha do LCD que mudou
+  if (atualizarLinha0) {
+    lcd.setCursor(0, 0);
+    if (!arLigado) {
+      lcd.print("AR:OFF Temp:");
+      lcd.print(tempAtual);
+      lcd.print("C   ");
+    } else if (tempAtual > TEMP_ALVO) {
+      lcd.print("AR:ON ");
+      lcd.print(tempAtual);
+      lcd.print("C->");
+      lcd.print(TEMP_ALVO);
+      lcd.print("C   ");
+    } else {
+      lcd.print("AR:ON  ");
+      lcd.print(tempAtual);
+      lcd.print("C FIXO ");
+    }
+    atualizarLinha0 = false;
+  }
+
+  if (atualizarLinha1) {
+    lcd.setCursor(0, 1);
+    if (alarmeDisparado) {
+      lcd.print("INVASAO! ");
+      lcd.print(senhaDigitada);
+      lcd.print("       ");
+    } else {
+      lcd.print("Alarme: Seguro  ");
+    }
+    atualizarLinha1 = false;
+  }
+}

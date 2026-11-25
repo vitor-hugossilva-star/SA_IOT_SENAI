@@ -109,3 +109,30 @@ void loop() {
     noTone(Buzzer);
     estadoSom = false;
   }
+
+  // 3. Transição da Temperatura (250ms)
+  if (arLigado) {
+    if (millis() - tempoAnteriorTemp >= 250) {
+      tempoAnteriorTemp = millis();
+      if (tempAtual > TEMP_ALVO) {
+        tempAtual--;
+        atualizarLinha0 = true;
+      }
+    }
+  } else {
+    if (voltandoAoAmbiente) {
+      if (millis() - tempoAnteriorTemp >= 250) {
+        tempoAnteriorTemp = millis();
+        if (tempAtual < tempSensor) {
+          tempAtual++;
+          atualizarLinha0 = true;
+        } else {
+          voltandoAoAmbiente = false;
+        }
+      }
+    } else if (tempAtual != tempSensor) {
+      tempAtual = tempSensor;
+      atualizarLinha0 = true;
+    }
+  }
+  

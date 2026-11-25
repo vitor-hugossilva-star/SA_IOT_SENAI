@@ -47,3 +47,65 @@ unsigned long tempoAnteriorSensores = 0;
 bool atualizarLinha0 = true;
 bool atualizarLinha1 = true;
 
+void setup() {
+  pinMode(Buzzer, OUTPUT);
+  noTone(Buzzer);
+
+  teclado.setDebounceTime(1); // Na maquete física real use 20
+
+  lcd.begin(16, 2);
+
+  tempSensor = (analogRead(Temp) * 5.0 / 1024.0 - 0.5) * 100.0;
+  tempAtual = tempSensor;
+}
+
+void loop() {
+  // 1. Lê sensores a cada 200ms (deixa o teclado bem mais leve)
+  if (millis() - tempoAnteriorSensores >= 200) {
+    tempoAnteriorSensores = millis();
+
+    int leituraLuz = analogRead(SensorPorta);
+    if (!alarmeArmado && leituraLuz >= LIMITE_LUZ) {
+      alarmeArmado = true;
+    }
+
+    bool feixeCortado = (leituraLuz < LIMITE_LUZ);
+    if (alarmeArmado && feixeCortado && !feixeEstavaCortado) {
+      alarmeDisparado = true;
+      atualizarLinha1 = true;
+      tone(Buzzer, 440);
+      estadoSom = true;
+      tempoAnteriorBuzzer = millis();
+    }
+    feixeEstavaCortado = feixeCortado;
+
+    tempSensor = (analogRead(Temp) * 5.0 / 1024.0 - 0.5) * 100.0;
+    bool tempAlta = (tempSensor >= TEMP_LIMITE);
+
+    if (!tempAlta) {
+      desligadoManual = false;
+    }
+
+    if (tempAlta && !arLigado && !desligadoManual) {
+      arLigado = true;
+      voltandoAoAmbiente = false;
+      atualizarLinha0 = true;
+    }
+  }
+
+  // 2. Buzzer com bip curto (100ms ligado, 500ms desligado) para diminuir lag no Tinkercad
+  if (alarmeDisparado) {
+    unsigned long agora = millis();
+    if (estadoSom && (agora - tempoAnteriorBuzzer >= 100)) {
+      noTone(Buzzer);
+      estadoSom = false;
+      tempoAnteriorBuzzer = agora;
+    } else if (!estadoSom && (agora - tempoAnteriorBuzzer >= 500)) {
+      tone(Buzzer, 440);
+      estadoSom = true;
+      tempoAnteriorBuzzer = agora;
+    }
+  } else if (estadoSom) {
+    noTone(Buzzer);
+    estadoSom = false;
+  }

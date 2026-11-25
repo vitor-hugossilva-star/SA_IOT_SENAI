@@ -96,7 +96,6 @@ Para compilar e enviar o código para o Arduino físico, instale as seguintes bi
 * **[Nome do Integrante 3]** — *[Ex: Circuito / Testes]*
 
 ---
-
 ## 📄 Licença
 
-Projeto desenvolvido para fins educacionais no **SENAI**. 
+Este projeto está licenciado sob a **GNU General Public License v3.0 (GPL-3.0)** — veja o arquivo [LICENSE](LICENSE) para mais detalhes.
